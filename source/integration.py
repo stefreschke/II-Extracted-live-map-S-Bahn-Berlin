@@ -3,13 +3,18 @@ Integration step for S Bahn Berlin data. Run this file to load and convert S Bah
 files accordingly.
 """
 import json
+from pandas.io.json import json_normalize
 
 
 def main():
-    with open('../data/tweets_SBahnBerlin.json') as f:
-        line = f.readline()
-        DATA = json.loads(line)
-        print(DATA)
+    """
+    Execution of integration step.
+    :return:
+    """
+    with open('../data/tweets_SBahnBerlin.json') as file:
+        lines = file.readlines()
+        data = [json.loads(object) for object in lines]
+        frame = json_normalize(data)
 
 
 if __name__ == '__main__':
