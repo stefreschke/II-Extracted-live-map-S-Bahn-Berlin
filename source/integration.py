@@ -4,7 +4,13 @@ files accordingly.
 """
 import json
 
-if __name__ == '__main__':
-    with open('tweets_SBahnBerlin.json') as f:
-        DATA = json.load(f)
+
+def main():
+    with open('../data/tweets_SBahnBerlin.json') as f:
+        line = f.readline()
+        DATA = json.loads(line)
         print(DATA)
+
+
+if __name__ == '__main__':
+    main()
