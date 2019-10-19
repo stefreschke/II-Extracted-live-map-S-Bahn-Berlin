@@ -1,1 +1,3 @@
-# information-integration-crawled-s-bahn-berlin
+# Exercise for Information Integration lecture
+
+## Crawled data of S Bahn Berlin
