@@ -11,7 +11,7 @@ def main():
     Execution of integration step.
     :return:
     """
-    with open('../data/tweets_SBahnBerlin.json') as file:
+    with open('../data/traffic_data.json') as file:
         lines = file.readlines()
         data = [json.loads(object) for object in lines]
         frame = json_normalize(data)
