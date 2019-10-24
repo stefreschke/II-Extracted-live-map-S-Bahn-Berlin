@@ -23,11 +23,5 @@ def main():
             df = converting(json_normalize(entries))
 
 
-
-class JSONParseException(Exception):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
 if __name__ == '__main__':
     main()
