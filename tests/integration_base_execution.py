@@ -2,9 +2,10 @@ import unittest
 
 
 class WholeExecution(unittest.TestCase):
+    @unittest.skip("Main test, do not execute in build")
     def test_execution(self):
-        import integration
-        integration.main()
+        import extracting
+        extracting.main()
 
 
 if __name__ == '__main__':
