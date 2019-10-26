@@ -31,7 +31,7 @@ def main():
                 logger.warning("Invalid line at {}".format(index))
                 continue
             entries = data_set["t"]
-            df = converting.convert_sub_data_frame(json_normalize(entries))
+            df, _ = converting.convert_sub_data_frame(json_normalize(entries))
             df['messpunkt'] = df.apply(lambda x: index, axis=1)
             my_fancy_df = pd.concat([my_fancy_df, df] if my_fancy_df is not None else [df],
                                     sort=False)
