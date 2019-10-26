@@ -43,7 +43,6 @@ def main():
                 counter += 1
 
 
-
 if __name__ == '__main__':
     init_logger()
     main()
