@@ -5,6 +5,7 @@ files accordingly.
 import json
 import logging
 import pandas as pd
+import codecs
 from pandas.io.json import json_normalize
 import converting
 from log_stuff import init_logger
@@ -17,7 +18,7 @@ def main():
     Execution of integration step.
     :return:
     """
-    with open('../data/traffic_data.json') as file:
+    with codecs.open('../data/traffic_data.json', "r", "utf-8") as file:
         counter = 1
         my_fancy_df = None
         for index, line in enumerate(file):
@@ -27,7 +28,7 @@ def main():
             try:
                 data_set = json.loads(suspected_json)
             except json.decoder.JSONDecodeError:
-                logger.warning("Invalid line at {}, input was {}".format(index, line))
+                logger.warning("Invalid line at {}".format(index))
                 continue
             entries = data_set["t"]
             df = converting.convert_sub_data_frame(json_normalize(entries))
