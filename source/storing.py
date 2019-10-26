@@ -3,9 +3,10 @@ import pandas as pd
 import os
 
 
-def create_connection(filename="s-bahn-livekarte.db"):
+def write_dataframe_to_sql(filename="s-bahn-livekarte.db", data_frame=None):
     with sqlite3.connect('../data/' + filename) as conn:
-        pass
+        assert isinstance(data_frame, pd.DataFrame)
+        data_frame.to_sql(name="trains", con=conn)
 
 
 def read_data_frames():
@@ -22,4 +23,9 @@ def read_data_frames():
         else:
             continue
     my_fancy_df.to_pickle("../data/whole.pkl")
+
+
+def read_data_frame_and_convert(data_frame="../data/whole.pkl"):
+    df = pd.read_pickle(data_frame)
+    write_dataframe_to_sql(data_frame=df)
 
