@@ -38,7 +38,7 @@ def main():
             if my_fancy_df.size > 1000000:
                 filename = "../data/frame_{:03d}.pkl".format(counter)
                 my_fancy_df.to_pickle(filename)
-                logger.info("Wrote df to {}".format(filename))
+                logger.info("Wrote df to {} got to line {}".format(filename, index))
                 my_fancy_df = None
                 counter += 1
 
