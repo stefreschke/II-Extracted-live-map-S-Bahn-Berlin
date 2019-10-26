@@ -9,7 +9,6 @@ from pandas.io.json import json_normalize
 import converting
 from log_stuff import init_logger
 
-
 logger = logging.getLogger('extraction')
 
 
@@ -19,6 +18,7 @@ def main():
     :return:
     """
     with open('../data/traffic_data.json') as file:
+        counter = 1
         my_fancy_df = None
         for index, line in enumerate(file):
             parts = line.split("|")
@@ -32,9 +32,12 @@ def main():
             entries = data_set["t"]
             df = converting.convert_sub_data_frame(json_normalize(entries))
             df['messpunkt'] = df.apply(lambda x: index, axis=1)
-            my_fancy_df = pd.concat([my_fancy_df, df] if my_fancy_df is not None else [df])
+            my_fancy_df = pd.concat([my_fancy_df, df] if my_fancy_df is not None else [df],
+                                    sort=False)
             logger.debug("Line %d processed, df has %d entries", index, my_fancy_df.size)
-        my_fancy_df.to_pickle("../data/shortend.pkl")
+            if my_fancy_df.size > 10e6:
+                my_fancy_df.to_pickle("../data/frame_{:03d}.pkl".format(counter))
+                counter += 1
 
 
 if __name__ == '__main__':
