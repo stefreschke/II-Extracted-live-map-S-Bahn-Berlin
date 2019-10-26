@@ -35,9 +35,13 @@ def main():
             my_fancy_df = pd.concat([my_fancy_df, df] if my_fancy_df is not None else [df],
                                     sort=False)
             logger.debug("Line %d processed, df has %d entries", index, my_fancy_df.size)
-            if my_fancy_df.size > 10e6:
-                my_fancy_df.to_pickle("../data/frame_{:03d}.pkl".format(counter))
+            if my_fancy_df.size > 1000000:
+                filename = "../data/frame_{:03d}.pkl".format(counter)
+                my_fancy_df.to_pickle(filename)
+                logger.info("Wrote df to {}".format(filename))
+                my_fancy_df = None
                 counter += 1
+
 
 
 if __name__ == '__main__':
