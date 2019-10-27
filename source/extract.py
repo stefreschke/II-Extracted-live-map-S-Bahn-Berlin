@@ -2,6 +2,7 @@
 Performing a simple export from json data to sql, mostly without using deeper pandas features.
 """
 import json
+import os
 import logging
 import sqlite3
 import pandas as pd
@@ -12,12 +13,14 @@ from log_stuff import init_logger
 LOGGER = logging.getLogger('extraction')
 
 
-def main(sqlite_file=res.SQLITE_FILE, data_file=res.DATA_FILE, stops_file=res.STOPS_FILE):
+def main(sqlite_file=res.SQLITE_FILE, data_file=res.DATA_FILE, stops_file=res.STOPS_FILE,
+         limit=10e8):
     """
     Perform extraction for given files (which all default to values from res.py).
     :param sqlite_file: Database to write stuff to.
     :param data_file: json-file to get all stuff from.
     :param stops_file: json-file containing data on stops.
+    :param limit: db size file limit at which the extraction should be aborted.
     :return:
     """
     with sqlite3.connect(sqlite_file) as conn:
@@ -70,9 +73,9 @@ CREATE TABLE "projection" (
                         'INSERT INTO datarecord(snapshot_id, x, y, n, l, i, rt, rd, d, c)'
                         ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (
                             snapshot_id, entry["x"], entry["y"], entry["n"].strip(),
-                            entry["l"].strip(),
-                            entry["i"].strip(), entry["rt"] if "rt" in entry else 0, entry["rd"],
-                            entry["d"], entry["c"]))
+                            entry["l"].strip(), entry["i"].strip(),
+                            entry["rt"] if "rt" in entry else 0, entry["rd"], entry["d"],
+                            entry["c"]))
                     datarecord_id = cursor.lastrowid
                     for projections in entry["p"]:
                         cursor.execute(
@@ -80,7 +83,7 @@ CREATE TABLE "projection" (
                             ' VALUES (?, ?, ?, ?, ?)',
                             (datarecord_id, projections["x"], projections["y"], projections["t"],
                              projections["d"] if "d" in projections else None))
-                if index > 3600:
+                if os.path.getsize(os.getcwd() + "\\" + sqlite_file) / limit > 1:
                     break  # 1GB Limit by try out
 
         # stops
