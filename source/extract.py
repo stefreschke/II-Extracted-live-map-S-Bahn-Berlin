@@ -13,8 +13,8 @@ from project_logging import init_logger
 LOGGER = logging.getLogger('extraction')
 
 
-def main(sqlite_file=file_resources.SQLITE_FILE, data_file=file_resources.DATA_FILE, stops_file=file_resources.STOPS_FILE,
-         limit=10e8):
+def main(sqlite_file=file_resources.SQLITE_FILE, data_file=file_resources.DATA_FILE,
+         stops_file=file_resources.STOPS_FILE, limit=10e8):
     """
     Perform extraction for given files (which all default to values from file_resources.py).
     :param sqlite_file: Database to write stuff to.
@@ -24,35 +24,8 @@ def main(sqlite_file=file_resources.SQLITE_FILE, data_file=file_resources.DATA_F
     :return:
     """
     with sqlite3.connect(sqlite_file) as conn:
-        conn.executescript("""
-CREATE TABLE "snapshot" (
-    "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "taken_at"	TEXT NOT NULL
-);
-CREATE TABLE "datarecord" (
-    "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "snapshot_id"	INTEGER NOT NULL,
-    "x"	INTEGER NOT NULL,
-    "y"	INTEGER NOT NULL,
-    "n"	TEXT NOT NULL,
-    "l"	TEXT NOT NULL,
-    "i"	TEXT NOT NULL,
-    "rt"	INTEGER NOT NULL,
-    "rd"	TEXT NOT NULL,
-    "d"	INTEGER NOT NULL,
-    "c"	INTEGER NOT NULL,
-    FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
-);
-CREATE TABLE "projection" (
-    "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "datarecord_id"	INTEGER NOT NULL,
-    "x"	INTEGER NOT NULL,
-    "y"	INTEGER NOT NULL,
-    "t"	INTEGER NOT NULL,
-    "d"	INTEGER,
-    FOREIGN KEY(datarecord_id) REFERENCES datarecord(id)
-);
-        """)
+        # Create tables using sql file "create_tables.sql"
+        create_data_bases(con=conn, file_path="create_tables.sql")
         cursor = conn.cursor()
 
         # big snapshot json file
@@ -83,19 +56,52 @@ CREATE TABLE "projection" (
                             ' VALUES (?, ?, ?, ?, ?)',
                             (datarecord_id, projections["x"], projections["y"], projections["t"],
                              projections["d"] if "d" in projections else None))
-                if os.path.getsize(os.getcwd() + "\\" + sqlite_file) / limit > 1:
-                    break  # 1GB Limit by try out
+                # check if file size limit was reached
+                if get_file_size(sqlite_file) / limit > 1:
+                    break
 
-        # stops
-        with open(stops_file, encoding='utf-8') as file:
-            stops = json.loads(file.read())
-            df = pd.DataFrame(stops["stops"])
-            df = df.rename(columns=df.iloc[0]).drop(df.index[0])[["x", "y", "name"]]
-            df.to_sql(name="stops", con=conn, index_label="id")
-
+        # Write stops to SQL-file as well
+        stop_data_to_sql(con=conn, file_path=stops_file)
     LOGGER.info("Finished reading data from %s, wrote to %s", data_file, sqlite_file)
+
+
+def stop_data_to_sql(con, file_path=file_resources.STOPS_FILE):
+    """
+    Write stops to given sql connection.
+    :param con: SQL-connection that can be used to use to_sql on pd.DataFrame
+    :param file_path: Path to stops.json (in data folder, e.g.)
+    :return:
+    """
+    with open(file_path, encoding='utf-8') as file:
+        stops = json.loads(file.read())
+        data_frame = pd.DataFrame(stops["stops"])
+        data_frame = data_frame.rename(columns=data_frame.iloc[0]).drop(data_frame.index[0])[
+            ["x", "y", "name"]]
+        data_frame.to_sql(name="stops", con=con, index_label="id")
+
+
+def create_data_bases(con, file_path="create_tables.sql"):
+    """
+    Execute SQL-Script to generate tables. Script is written in another file to ensure code
+    readability.
+    :param con: sql-connection the tables should be created at
+    :param file_path: to find sql-script at
+    :return:
+    """
+    with open(file_path, 'r') as file:
+        sql_script = file.read().replace('\n', '')
+        con.executescript(sql_script)
+
+
+def get_file_size(file_to_look_at):
+    """
+    Get file size using os.
+    :param file_to_look_at: relative path to file to look at
+    :return: file size in bytes (1 GB = 10e8 B)
+    """
+    return os.path.getsize(os.getcwd() + "\\" + file_to_look_at)
 
 
 if __name__ == '__main__':
     init_logger()
-    main()
+    main()  # TODO: parse command line arguments to specify .db-file size limit
