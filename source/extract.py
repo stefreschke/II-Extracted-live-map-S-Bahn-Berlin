@@ -9,7 +9,7 @@ import pandas as pd
 import res
 from log_stuff import init_logger
 
-logger = logging.getLogger('extraction')
+LOGGER = logging.getLogger('extraction')
 
 
 def main(sqlite_file=res.SQLITE_FILE, data_file=res.DATA_FILE, stops_file=res.STOPS_FILE):
@@ -60,26 +60,26 @@ CREATE TABLE "projection" (
                 try:
                     data_set = json.loads(suspected_json)
                 except json.decoder.JSONDecodeError:
-                    logger.warning("Invalid line at %d", index)
+                    LOGGER.warning("Invalid line at %d", index)
                     continue
                 at_time = parts[0].split(" ")[0] + " " + data_set["ts"]
                 cursor.execute('INSERT INTO snapshot (taken_at) VALUES (?)', (at_time,))
                 snapshot_id = cursor.lastrowid
                 for entry in data_set["t"]:
                     cursor.execute(
-                        'INSERT INTO datarecord(snapshot_id, x, y, n, l, i, rt, rd, d, c) VALUES '
-                        '(?, '
-                        '?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                        (
-                        snapshot_id, entry["x"], entry["y"], entry["n"].strip(), entry["l"].strip(),
-                        entry["i"].strip(), entry["rt"] if "rt" in entry else 0, entry["rd"],
-                        entry["d"], entry["c"]))
+                        'INSERT INTO datarecord(snapshot_id, x, y, n, l, i, rt, rd, d, c)'
+                        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (
+                            snapshot_id, entry["x"], entry["y"], entry["n"].strip(),
+                            entry["l"].strip(),
+                            entry["i"].strip(), entry["rt"] if "rt" in entry else 0, entry["rd"],
+                            entry["d"], entry["c"]))
                     datarecord_id = cursor.lastrowid
-                    for p in entry["p"]:
+                    for projections in entry["p"]:
                         cursor.execute(
-                            'INSERT INTO projection(datarecord_id, x, y, t, d) VALUES (?, ?, ?, '
-                            '?, ?)',
-                            (datarecord_id, p["x"], p["y"], p["t"], p["d"] if "d" in p else None))
+                            'INSERT INTO projection(datarecord_id, x, y, t, d)'
+                            ' VALUES (?, ?, ?, ?, ?)',
+                            (datarecord_id, projections["x"], projections["y"], projections["t"],
+                             projections["d"] if "d" in projections else None))
                 if index > 3600:
                     break  # 1GB Limit by try out
 
@@ -90,7 +90,7 @@ CREATE TABLE "projection" (
             df = df.rename(columns=df.iloc[0]).drop(df.index[0])[["x", "y", "name"]]
             df.to_sql(name="stops", con=conn, index_label="id")
 
-    logger.info("Finished reading data from %s, wrote to %s", data_file, sqlite_file)
+    LOGGER.info("Finished reading data from %s, wrote to %s", data_file, sqlite_file)
 
 
 if __name__ == '__main__':
