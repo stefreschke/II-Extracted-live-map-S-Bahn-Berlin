@@ -7,16 +7,16 @@ import logging
 import sqlite3
 import pandas as pd
 
-import res
-from log_stuff import init_logger
+import file_resources
+from project_logging import init_logger
 
 LOGGER = logging.getLogger('extraction')
 
 
-def main(sqlite_file=res.SQLITE_FILE, data_file=res.DATA_FILE, stops_file=res.STOPS_FILE,
+def main(sqlite_file=file_resources.SQLITE_FILE, data_file=file_resources.DATA_FILE, stops_file=file_resources.STOPS_FILE,
          limit=10e8):
     """
-    Perform extraction for given files (which all default to values from res.py).
+    Perform extraction for given files (which all default to values from file_resources.py).
     :param sqlite_file: Database to write stuff to.
     :param data_file: json-file to get all stuff from.
     :param stops_file: json-file containing data on stops.
