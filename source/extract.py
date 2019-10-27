@@ -8,11 +8,11 @@ import pandas as pd
 
 import res
 
-SQLITE_FILENAME = './data/' + "s-bahn-livekarte.db"
+SQLITE_FILENAME = '../data/' + "s-bahn-livekarte.db"
 
 
 def main():
-    with sqlite3.connect(res.DATA_FILE) as conn:
+    with sqlite3.connect(res.SQLITE_FILE) as conn:
         conn.executescript("""
 CREATE TABLE "snapshot" (
     "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +76,7 @@ CREATE TABLE "projection" (
                     break  # 1GB Limit
 
         # stops
-        with open('./data/stops.json', encoding='utf-8') as file:
+        with open(res.STOPS_FILE, encoding='utf-8') as file:
             stops = json.loads(file.read())
             df = pd.DataFrame(stops["stops"])
             df = df.rename(columns=df.iloc[0]).drop(df.index[0])[["x", "y", "name"]]
