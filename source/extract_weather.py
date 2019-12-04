@@ -33,7 +33,7 @@ def extract_weather():
     dfall = dfall[['MESS_DATUM', 'TT_TU', 'RS_IND']]
     dfall
 
-    with sqlite3.connect(file_resources.SQLITE_FILE) as conn:
+    with sqlite3.connect(file_resources.INTEGRATED_DB_FILE) as conn:
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS "weather" (
                 "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
