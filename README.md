@@ -1,4 +1,4 @@
-# Exercise for Information Integration lecture
+# Exercises for Information Integration lecture
 
 ## Extraction
 How to use:
