@@ -12,8 +12,7 @@ berlin_hbf = {"y": 52.525, "x": 13.369444}
 def reduced_s_bahn():
     traffic_db = sqlite3.connect(file_resources.TIMS_TRAFFIC_DB)
     df = pd.read_sql_query("SELECT * FROM delays AS d "
-                           "WHERE d.line='S7' "
-                           "AND TIME(d.checkpoint) BETWEEN '07:00:00' AND '10:00:00'", traffic_db)
+                           "WHERE d.line='S7' ", traffic_db)
     df.drop(columns=["d", "c"], inplace=True)
     df = df.astype({
         "x": int, "y": int, "delay": int,
