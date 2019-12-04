@@ -25,3 +25,10 @@ CREATE TABLE "projection" (
     "d"	INTEGER,
     FOREIGN KEY(datarecord_id) REFERENCES datarecord(id)
 );
+
+CREATE TABLE "weather" (
+    "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "at_time"	TEXT NOT NULL UNIQUE,
+    "temperature" REAL NOT NULL,
+    "condition" TEXT NOT NULL
+);
