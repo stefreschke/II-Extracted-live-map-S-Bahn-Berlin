@@ -71,12 +71,34 @@ def write_list_of_snapshots(df):
                            (row["date"], row["time"]))
 
 
+def write_delays(df):
+    with sqlite3.connect(file_resources.INTEGRATED_DB_FILE) as conn:
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS "delays" (
+                "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                "snapshot" INTEGER NOT NULL, 
+                "vehicle_id" TEXT NOT NULL, 
+                "delay" INTEGER NOT NULL, 
+                "x" REAL NOT NULL, 
+                "y" REAL NOT NULL, 
+                "dist_griebnitzsee" REAL NOT NULL,
+                "dist_berlin_hbf" REAL NOT NULL,
+                FOREIGN KEY(snapshot) REFERENCES snapshot(id)
+            );""")
+        cursor = conn.cursor()
+
+        for index, row in df.iterrows():
+            cursor.execute('INSERT INTO delays (snapshot, vehicle_id, delay, x, y, dist_griebnitzsee, dist_berlin_hbf) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                           (row["snapshot"], row["vehicle_id"], row["delay"], row["x"], row["y"], row["distance_griebnitzsee"], row["distance_berlin_hbf"]))
+
+
 def integrate():
     df = reduced_s_bahn()
     df = calculate_distances_to_targets(df)
     # df = df.query("x<{} and x>{}".format(berlin_hbf["x"], griebnitzsee["x"]))
     df = df.loc[(df['x'] >= griebnitzsee["x"]) & (df['x'] <= berlin_hbf["x"])]
     df = df.loc[df["destination"] == "S Potsdam Hauptbahnhof"]
+    df = df.drop(columns=["destination"])
 
     candidates = df[["date", "vehicle_id"]]
     candidates.drop_duplicates(inplace=True)
@@ -86,14 +108,13 @@ def integrate():
     snapshots = snapshots.drop_duplicates()
     snapshots = snapshots.reset_index(drop=True)
 
-    # df["snapshot"] = df.apply(axis=1)
+    df["snapshot"] = df.apply(lambda line: snapshots.loc[(line["date"] == snapshots["date"]) & (line["time"] == snapshots["time"])].iloc[0].name, axis=1)
 
     write_table_candidates(candidates)
     write_list_of_snapshots(snapshots)
-    pass
+    write_delays(df)
 
 
 if __name__ == '__main__':
     extract_weather.extract_weather()
     integrate()
-    pass
