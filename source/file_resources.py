@@ -11,3 +11,4 @@ RAIN_FILE = "../data/produkt_rr_stunde_20180601_20191202_00403.txt"
 # integration step
 TIMS_TRAFFIC_DB = "../data/traffic.db"
 INTEGRATED_DB_FILE = "../data/delay-hbf-hpi-weather.db"
+# cleansing step
