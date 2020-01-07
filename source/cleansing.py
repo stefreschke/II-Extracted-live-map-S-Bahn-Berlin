@@ -15,7 +15,7 @@ def all_data_frames(fancy_db):
     delays = read_table_from_db(fancy_db, "delays")
     snapshots = read_table_from_db(fancy_db, "snapshot")
     candidate_trains = read_table_from_db(fancy_db, "candidate_trains")
-    pass
+    return delays, snapshots, candidate_trains
 
 
 def read_table_from_db(fancy_db, table):
@@ -23,4 +23,4 @@ def read_table_from_db(fancy_db, table):
 
 
 if __name__ == '__main__':
-    db = get_integrated_db(all_data_frames)
+    delays, snapshots, candidates = get_integrated_db(all_data_frames)
