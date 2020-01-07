@@ -13,3 +13,8 @@ To remove max. lines read limit:
 How to use:
 1. Ensure "traffic.db" and DWD Data from extraction is in "./data/"-Folder
 2. Run python on "./source/integrate.py"
+
+## Cleansing
+How to use:
+1. Ensure data from integration is in "./data/"-Folder
+2. Run python on "./source/cleansing.py"
